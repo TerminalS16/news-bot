@@ -1,10 +1,14 @@
+import html
+
 from bot.schemas import DigestBlock
 
-TELEGRAM_MAX_MESSAGE_LENGTH = 4000  # запас от официального лимита Telegram в 4096 символов
+TELEGRAM_MAX_MESSAGE_LENGTH = 4000
 
 
 def format_block(block: DigestBlock) -> str:
-    return f"📌 <b>{block.topic_name}</b>\n{block.content_text}"
+    safe_topic_name = html.escape(block.topic_name)
+    safe_content = html.escape(block.content_text)
+    return f"📌 <b>{safe_topic_name}</b>\n{safe_content}"
 
 
 def split_into_messages(text: str, max_len: int = TELEGRAM_MAX_MESSAGE_LENGTH) -> list[str]:

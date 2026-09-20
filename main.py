@@ -66,7 +66,10 @@ async def send_digest_for_user(bot: Bot, provider: LLMProvider, user_id: int) ->
         for block in blocks:
             full_text = format_block(block)
             for chunk in split_into_messages(full_text):
-                await bot.send_message(chat_id, chunk, parse_mode="HTML")
+                try:
+                    await bot.send_message(chat_id, chunk, parse_mode="HTML")
+                except Exception as e:
+                    logger.error(f"Не удалось отправить часть дайджеста (тема: {block.topic_name}): {e}")
 
     logger.info(f"Дайджест отправлен user_id={user_id}")
 
