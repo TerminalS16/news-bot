@@ -52,6 +52,7 @@ async def send_digest_for_user(bot: Bot, provider: LLMProvider, user_id: int) ->
 
         unsent = get_unsent_articles(session, ut.id, all_articles)
         if not unsent:
+            blocks.append(DigestBlock(topic_name=topic.name, content_text="Новых новостей нет."))
             continue
 
         block = filter_and_format(unsent, topic, ut.depth_level, provider)
