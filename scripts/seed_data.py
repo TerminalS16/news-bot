@@ -61,8 +61,7 @@ topics_data = [
         ),
         "depth_level": "summary",
         "sources": [
-            "https://www.consultant.ru/rss/db.xml",
-            "https://www.consultant.ru/rss/hotdocs.xml",
+            "https://www.klerk.ru/export/news.rss",
         ],
     },
 ]
