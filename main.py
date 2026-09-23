@@ -8,6 +8,7 @@ from sqlalchemy import select
 from bot.config import settings
 from bot.handlers import router
 from bot.scheduler import setup_scheduler
+from bot.schemas import DigestBlock
 from bot.db import SessionLocal, get_unsent_articles, mark_as_sent
 from bot.models import User, UserTopic, Topic, Source
 from bot.news_fetcher import fetch_articles
