@@ -38,6 +38,8 @@ async def send_digest_for_user(bot: Bot, provider: LLMProvider, user_id: int) ->
 
 
     blocks = []
+    pending = []  # (user_topic_id, статьи): пометим отправленными только после отправки
+
     for ut in user_topics:
         topic = session.get(Topic, ut.topic_id)
         sources = session.scalars(
@@ -56,9 +58,15 @@ async def send_digest_for_user(bot: Bot, provider: LLMProvider, user_id: int) ->
             blocks.append(DigestBlock(topic_name=topic.name, content_text="Новых новостей нет."))
             continue
 
-        block = filter_and_format(unsent, topic, ut.depth_level, provider)
+        try:
+            block = filter_and_format(unsent, topic, ut.depth_level, provider)
+        except Exception as e:
+            logger.error(f"Ошибка ИИ-обработки темы {topic.name}: {e}")
+            blocks.append(DigestBlock(topic_name=topic.name, content_text="Не удалось обработать тему (ошибка ИИ-обработки), статьи придут в следующем дайджесте."))
+            continue
+
         blocks.append(block)
-        mark_as_sent(session, ut.id, unsent)
+        pending.append((ut.id, unsent))
 
     session.close()
 
@@ -72,6 +80,11 @@ async def send_digest_for_user(bot: Bot, provider: LLMProvider, user_id: int) ->
                     await bot.send_message(chat_id, chunk, parse_mode="HTML")
                 except Exception as e:
                     logger.error(f"Не удалось отправить часть дайджеста (тема: {block.topic_name}): {e}")
+
+    mark_session = SessionLocal()
+    for ut_id, articles in pending:
+        mark_as_sent(mark_session, ut_id, articles)
+    mark_session.close()
 
     logger.info(f"Дайджест отправлен user_id={user_id}")
 
